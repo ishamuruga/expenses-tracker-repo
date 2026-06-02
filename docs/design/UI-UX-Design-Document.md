@@ -3,8 +3,8 @@
 ## 1. Document Control
 - Document Name: UI/UX Design Document
 - Product: ExpenseTracker Web Application
-- Version: 1.0
-- Date: May 29, 2026
+- Version: 1.1
+- Date: June 2, 2026
 - Related Reference: docs/ExpenseTracker-Product-Specification.md
 
 ## 2. UI/UX Objectives
@@ -70,6 +70,9 @@ Global layout:
   - Expense list page action
 - Steps:
   - Fill required fields
+  - Select expense currency from supported currency list
+  - Optionally select base/reporting currency preference
+  - View conversion preview for amount in base/reporting currency (when rate exists)
   - Optionally add merchant/notes/tags/attachment
   - Save as Draft or Submit
 - Feedback:
@@ -98,6 +101,8 @@ Global layout:
 - Required fields clearly marked.
 - Immediate validation for format and value range.
 - Submission blocked for invalid form states.
+- Currency fields validate against supported currency options.
+- Conversion preview panel updates in near real-time when amount or currency selections change.
 
 ### 7.2 Data Grids and Lists
 - Standard columns with sortable headers.
@@ -117,6 +122,7 @@ Global layout:
 - Skeletons or progress indicators during loads.
 - Toast/snackbar for success and non-critical errors.
 - Inline error panel for action-specific failures.
+- When conversion data is unavailable, show a non-blocking inline notice and allow draft save.
 
 ## 8. Responsive Design Strategy (TailwindCSS)
 - Mobile-first layout approach.
@@ -127,6 +133,9 @@ Global layout:
 - Tables on mobile:
   - Prioritize key columns.
   - Support horizontal scroll where required.
+- Multi-currency controls:
+  - Base currency selector and conversion preview should stack below amount field on small screens.
+  - On medium/large screens, place conversion preview adjacent to amount/currency controls where space allows.
 
 ## 9. Design System Integration (Material + Tailwind)
 - Use Material components for accessibility and interaction consistency.
@@ -178,6 +187,8 @@ Global layout:
 - Budget threshold warnings are clearly noticeable and understandable.
 - Manager can process approval actions without navigation confusion.
 - Admin can locate key audit events efficiently.
+- Users can understand equivalent amount in selected base/reporting currency during expense creation.
+- Base/reporting currency preference remains consistent across returning sessions.
 
 ## 16. Out-of-Scope UX for Current Phase
 - Reports generation UX.

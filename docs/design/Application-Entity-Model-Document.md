@@ -3,8 +3,8 @@
 ## 1. Document Control
 - Document Name: Application Entity Model Document
 - Product: ExpenseTracker Web Application
-- Version: 1.0
-- Date: May 29, 2026
+- Version: 1.1
+- Date: June 2, 2026
 - Related Reference: docs/ExpenseTracker-Product-Specification.md
 
 ## 2. Modeling Objectives
@@ -19,6 +19,7 @@ The ExpenseTracker domain centers around user-managed expenses, budget controls,
 Primary bounded contexts:
 - Identity and Access
 - Expense Management
+- Currency Management
 - Budgeting
 - Notifications
 - Audit and Logging
@@ -258,6 +259,36 @@ Key attributes:
 - updatedByUserId
 - updatedAt
 
+### 4.14 Currency
+Purpose:
+- Defines supported currencies available for expense entry and preference selection.
+
+Key attributes:
+- code (ISO currency code, unique)
+- name
+- symbol
+- isActive
+- updatedAt
+
+Rules:
+- Only active currencies can be selected for new expenses.
+- Currency code must follow ISO-4217 style representation.
+
+### 4.15 ExchangeRate
+Purpose:
+- Stores mock conversion factors used for conversion preview to base/reporting currency.
+
+Key attributes:
+- exchangeRateId (or composite key in mock data)
+- baseCurrency
+- quoteCurrency
+- rate
+- updatedAt
+
+Rules:
+- rate must be greater than zero.
+- baseCurrency and quoteCurrency must reference supported active currencies.
+
 ## 5. Relationship Model (Cardinality)
 - User 1..* Session
 - User 1..* Expense (owner)
@@ -270,6 +301,10 @@ Key attributes:
 - User 1..* Notification
 - User 1..* NotificationPreference
 - User 1..* AuditLog (actor)
+- Currency 1..* Expense
+- Currency 1..* ExchangeRate (as base)
+- Currency 1..* ExchangeRate (as quote)
+- User 0..1 AppSetting (baseCurrency preference in current phase)
 
 ## 6. Lifecycle and State Models
 
@@ -307,6 +342,9 @@ Allowed transitions:
 - Referential integrity on all foreign-key-like references.
 - Immutable audit event timestamp once written.
 - Soft delete/deactivation preferred for master entities.
+- Expense.currency must map to active Currency.code.
+- AppSetting.key=baseCurrency must map to active Currency.code.
+- Conversion preview calculations require valid ExchangeRate pairs.
 
 ## 9. Storage and Persistence Notes (Mock Phase)
 - json-server stores entities as resource collections.

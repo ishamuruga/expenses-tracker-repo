@@ -1,0 +1,227 @@
+@startuml fr-02-1-create-expense-class-diagram
+title FR-02.1 Create Expense - Class Diagram
+
+hide empty members
+skinparam classAttributeIconSize 0
+
+package "Feature Layer" {
+  class ExpenseCreateComponent {
+    - formBuilder: FormBuilder
+    - currencyService: CurrencyService
+    - expenseService: ExpenseService
+    - store: Store
+    + form
+    + currencies: readonly CurrencyDefinition[]
+    + baseCurrency: string
+    + conversionLabel: string
+    + categories: readonly Category[]
+    + errorMessage: string
+    + successMessage: string
+    + ngOnInit(): void
+    + onBaseCurrencyChange(currencyCode: string): void
+    + onCreateExpense(): void
+    - updateConversionLabel(): void
+  }
+}
+
+package "Service Layer" {
+  class ExpenseService {
+    - authService: AuthService
+    - auditLogService: AuditLogService
+    - currencyService: CurrencyService
+    + listCategories(): Observable<Category[]>
+    + createExpense(request: CreateExpenseRequest): Observable<Expense>
+    - seedCategoriesIfMissing(): void
+    - getExpenses(): Expense[]
+    - getCategories(): Category[]
+  }
+
+  class CurrencyService {
+    + listSupportedCurrencies(): Observable<CurrencyDefinition[]>
+    + isSupportedCurrency(code: string): boolean
+    + getBaseCurrencyPreference(): CurrencyPreference
+    + setBaseCurrencyPreference(baseCurrency: string): void
+    + convertAmount(amount: number, sourceCurrency: string, targetCurrency: string): number | null
+    - seedCurrencyDataIfMissing(): void
+    - getCurrencies(): CurrencyDefinition[]
+    - getExchangeRates(): ExchangeRate[]
+  }
+
+  class AuthService {
+    + getCurrentUser(): Omit~AppUser, 'passwordHash'~ | null
+    + isAuthenticated(): boolean
+  }
+
+  class AuditLogService {
+    + appendLog(input): AuditLogEntry
+    + getLogs(): AuditLogEntry[]
+  }
+}
+
+package "Store Layer" {
+  class ExpenseState {
+    + items: readonly Expense[]
+    + creating: boolean
+    + error: string | null
+  }
+
+  class ExpenseActions <<action group>> {
+    + createExpenseStarted
+    + createExpenseSuccess
+    + createExpenseFailure
+  }
+
+  class ExpenseReducer <<reducer>> {
+    + initialExpenseState: ExpenseState
+  }
+}
+
+package "Domain Models" {
+  class Expense {
+    + expenseId: string
+    + ownerUserId: string
+    + expenseDate: string
+    + amount: number
+    + currency: string
+    + categoryId: string
+    + merchant?: string
+    + paymentMethod?: string
+    + notes?: string
+    + attachmentUrl?: string
+    + status: ExpenseStatus
+    + createdAt: string
+    + updatedAt: string
+  }
+
+  class CreateExpenseRequest {
+    + expenseDate: string
+    + amount: number
+    + currency: string
+    + categoryId: string
+    + merchant?: string
+    + paymentMethod?: string
+    + notes?: string
+    + attachmentUrl?: string
+  }
+
+  class Category {
+    + categoryId: string
+    + name: string
+    + description?: string
+    + isSystemDefault: boolean
+    + isActive: boolean
+    + createdByUserId: string
+    + createdAt: string
+    + updatedAt: string
+  }
+
+  class CurrencyDefinition {
+    + code: string
+    + name: string
+    + symbol: string
+    + isActive: boolean
+  }
+
+  class CurrencyPreference {
+    + baseCurrency: string
+  }
+
+  class ExchangeRate {
+    + baseCurrency: string
+    + quoteCurrency: string
+    + rate: number
+    + updatedAt: string
+  }
+
+  class AppUser {
+    + userId: string
+    + fullName: string
+    + email: string
+    + passwordHash: string
+    + role: UserRole
+    + isEmailVerified: boolean
+    + status: 'Active' | 'Suspended'
+    + createdAt: string
+    + updatedAt: string
+    + lastLoginAt?: string
+  }
+
+  class AuditLogEntry {
+    + auditLogId: string
+    + eventType: AuditEventType
+    + actorUserId: string
+    + actorRole: string
+    + entityType: string
+    + entityId: string
+    + action: string
+    + correlationId: string
+    + eventTimestamp: string
+    + metadata: string
+  }
+}
+
+class Store
+class FormBuilder
+class Observable~T~
+class LocalStorage <<browser storage>>
+
+ExpenseCreateComponent --> FormBuilder
+ExpenseCreateComponent --> CurrencyService
+ExpenseCreateComponent --> ExpenseService
+ExpenseCreateComponent --> Store
+ExpenseCreateComponent ..> CurrencyDefinition
+ExpenseCreateComponent ..> Category
+ExpenseCreateComponent ..> CreateExpenseRequest
+
+ExpenseService --> AuthService
+ExpenseService --> AuditLogService
+ExpenseService --> CurrencyService
+ExpenseService ..> CreateExpenseRequest
+ExpenseService ..> Expense
+ExpenseService ..> Category
+ExpenseService --> LocalStorage
+
+CurrencyService ..> CurrencyDefinition
+CurrencyService ..> CurrencyPreference
+CurrencyService ..> ExchangeRate
+CurrencyService --> LocalStorage
+
+AuthService ..> AppUser
+AuditLogService ..> AuditLogEntry
+AuditLogService --> LocalStorage
+
+ExpenseReducer ..> ExpenseState
+ExpenseActions ..> Expense
+Store ..> ExpenseActions
+Store ..> ExpenseState
+
+Expense "*" --> "1" Category : categoryId
+Expense "*" --> "1" AppUser : ownerUserId
+
+note right of ExpenseCreateComponent
+  FR-02.1 UI entry point.
+  Builds the reactive form,
+  loads categories and currencies,
+  previews conversion,
+  dispatches create actions,
+  and delegates persistence to ExpenseService.
+end note
+
+note right of ExpenseService
+  Enforces business rules for:
+  - mandatory date/amount/currency/category
+  - positive amount
+  - supported currency
+  - active category
+  - active signed-in user
+  Persists Expense as Draft.
+end note
+
+note right of CurrencyService
+  Supports the implemented
+  multi-currency enhancement,
+  but FR-02.1 still fundamentally
+  requires currency as a mandatory field.
+end note
+
+@enduml

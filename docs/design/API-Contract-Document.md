@@ -3,8 +3,8 @@
 ## 1. Document Control
 - Document Name: API Contract Document
 - Product: ExpenseTracker Web Application
-- Version: 1.0
-- Date: May 29, 2026
+- Version: 1.1
+- Date: June 2, 2026
 - API Style: REST-like mock APIs via json-server
 - Related Reference: docs/ExpenseTracker-Product-Specification.md
 
@@ -41,6 +41,8 @@ Error responses include:
 - sessions
 - expenses
 - categories
+- currencies
+- exchangeRates
 - tags
 - budgets
 - notifications
@@ -142,6 +144,11 @@ Error responses include:
 ### 8.3 Get User Preferences
 - Method: GET
 - Path: /settings/preferences
+- Response fields (applicable subset for current phase):
+  - notificationPreferences
+  - defaultExpenseFields
+  - dashboardWidgetPreferences
+  - baseCurrency
 
 ### 8.4 Update User Preferences
 - Method: PATCH
@@ -150,6 +157,27 @@ Error responses include:
   - notificationPreferences
   - defaultExpenseFields
   - dashboardWidgetPreferences
+  - baseCurrency (optional)
+
+### 8.5 List Supported Currencies
+- Method: GET
+- Path: /currencies
+- Response fields:
+  - code
+  - name
+  - symbol
+  - isActive
+
+### 8.6 List Exchange Rates
+- Method: GET
+- Path: /exchangeRates
+- Query parameters:
+  - baseCurrency (optional, default USD for mock phase)
+- Response fields:
+  - baseCurrency
+  - quoteCurrency
+  - rate
+  - updatedAt
 
 ## 9. Expense Endpoints
 
@@ -167,6 +195,8 @@ Error responses include:
   - attachmentUrl (optional)
   - tags (optional list)
   - status (default Draft)
+- Validation notes:
+  - currency must be an active value from /currencies
 - Response:
   - created expense object with identifiers and audit timestamps
 
@@ -399,6 +429,8 @@ Error responses include:
 - Expense amount must be greater than zero.
 - Expense date cannot be invalid future date (policy configurable).
 - Category must be active for new expenses.
+- Expense currency must be active in supported currencies.
+- Base currency preference must be an active supported currency.
 - Status transitions must follow defined workflow.
 - Budget thresholds must be between 1 and 100.
 

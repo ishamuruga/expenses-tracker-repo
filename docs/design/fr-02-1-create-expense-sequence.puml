@@ -1,0 +1,151 @@
+@startuml fr-02-1-create-expense-sequence
+title FR-02.1 Create Expense With Mandatory Fields
+
+actor User
+participant "ExpenseCreateComponent" as ExpenseCreateComponent
+participant "CurrencyService" as CurrencyService
+participant "ExpenseService" as ExpenseService
+participant "NgRx Store" as Store
+participant "AuthService" as AuthService
+participant "AuditLogService" as AuditLogService
+database "LocalStorage" as LocalStorage
+
+== Screen Initialization ==
+
+User -> ExpenseCreateComponent: Open Create Expense screen
+activate ExpenseCreateComponent
+
+ExpenseCreateComponent -> CurrencyService: getBaseCurrencyPreference()
+activate CurrencyService
+CurrencyService -> LocalStorage: read currency preference
+LocalStorage --> CurrencyService: baseCurrency or default USD
+CurrencyService --> ExpenseCreateComponent: CurrencyPreference
+deactivate CurrencyService
+
+ExpenseCreateComponent -> CurrencyService: listSupportedCurrencies()
+activate CurrencyService
+CurrencyService -> LocalStorage: read currencies
+LocalStorage --> CurrencyService: active currency list
+CurrencyService --> ExpenseCreateComponent: Observable<CurrencyDefinition[]>
+deactivate CurrencyService
+
+ExpenseCreateComponent -> ExpenseService: listCategories()
+activate ExpenseService
+ExpenseService -> LocalStorage: read categories
+LocalStorage --> ExpenseService: active category list
+ExpenseService --> ExpenseCreateComponent: Observable<Category[]>
+deactivate ExpenseService
+
+ExpenseCreateComponent -> ExpenseCreateComponent: subscribe to amount/currency changes
+ExpenseCreateComponent -> CurrencyService: convertAmount(amount, currency, baseCurrency)
+activate CurrencyService
+CurrencyService -> LocalStorage: read currencies and exchange rates
+LocalStorage --> CurrencyService: currencies + exchange rates
+
+alt amount/currencies valid and rate exists
+  CurrencyService --> ExpenseCreateComponent: converted amount
+  ExpenseCreateComponent -> ExpenseCreateComponent: update conversionLabel
+else invalid amount or unsupported/missing rate
+  CurrencyService --> ExpenseCreateComponent: null
+  ExpenseCreateComponent -> ExpenseCreateComponent: clear conversionLabel
+end
+deactivate CurrencyService
+
+== Create Expense Submission ==
+
+User -> ExpenseCreateComponent: Enter date, amount, currency, category
+User -> ExpenseCreateComponent: Click "Save As Draft"
+
+ExpenseCreateComponent -> ExpenseCreateComponent: onCreateExpense()
+
+alt form invalid
+  ExpenseCreateComponent --> User: Submission blocked by reactive form validation
+else form valid
+  ExpenseCreateComponent -> Store: dispatch(createExpenseStarted)
+  ExpenseCreateComponent -> ExpenseService: createExpense(payload)
+  activate ExpenseService
+
+  ExpenseService -> ExpenseService: validate required fields
+
+  alt missing date/amount/currency/category
+    ExpenseService --> ExpenseCreateComponent: Error("Missing required fields")
+  else amount <= 0
+    ExpenseService --> ExpenseCreateComponent: Error("Amount must be positive")
+  else unsupported currency
+    ExpenseService -> CurrencyService: isSupportedCurrency(currency)
+    activate CurrencyService
+    CurrencyService -> LocalStorage: read currencies
+    LocalStorage --> CurrencyService: currencies
+    CurrencyService --> ExpenseService: false
+    deactivate CurrencyService
+    ExpenseService --> ExpenseCreateComponent: Error("Currency is invalid or unsupported")
+  else inactive/invalid category
+    ExpenseService -> LocalStorage: read categories
+    LocalStorage --> ExpenseService: categories
+    ExpenseService --> ExpenseCreateComponent: Error("Category is invalid or inactive")
+  else no active session
+    ExpenseService -> AuthService: getCurrentUser()
+    activate AuthService
+    AuthService -> LocalStorage: read session
+    LocalStorage --> AuthService: session
+    AuthService -> LocalStorage: read users
+    LocalStorage --> AuthService: users
+    AuthService --> ExpenseService: null
+    deactivate AuthService
+    ExpenseService --> ExpenseCreateComponent: Error("Active session is required")
+  else valid request
+    ExpenseService -> CurrencyService: isSupportedCurrency(currency)
+    activate CurrencyService
+    CurrencyService -> LocalStorage: read currencies
+    LocalStorage --> CurrencyService: currencies
+    CurrencyService --> ExpenseService: true
+    deactivate CurrencyService
+
+    ExpenseService -> LocalStorage: read categories
+    LocalStorage --> ExpenseService: categories
+
+    ExpenseService -> AuthService: getCurrentUser()
+    activate AuthService
+    AuthService -> LocalStorage: read session
+    LocalStorage --> AuthService: session
+    AuthService -> LocalStorage: read users
+    LocalStorage --> AuthService: users
+    AuthService --> ExpenseService: safe current user
+    deactivate AuthService
+
+    ExpenseService -> ExpenseService: build Expense(status=Draft, timestamps, ownerUserId)
+    ExpenseService -> LocalStorage: read expenses
+    LocalStorage --> ExpenseService: expense list
+    ExpenseService -> LocalStorage: append and persist expense
+
+    ExpenseService -> AuditLogService: appendLog(CreateExpenseDraft)
+    activate AuditLogService
+    AuditLogService -> LocalStorage: read audit logs
+    LocalStorage --> AuditLogService: audit log list
+    AuditLogService -> LocalStorage: append and persist audit log
+    AuditLogService --> ExpenseService: AuditLogEntry
+    deactivate AuditLogService
+
+    ExpenseService --> ExpenseCreateComponent: created Expense
+  end
+  deactivate ExpenseService
+
+  alt service returns Expense
+    ExpenseCreateComponent -> Store: dispatch(createExpenseSuccess(expense))
+    ExpenseCreateComponent -> ExpenseCreateComponent: clear optional fields
+    ExpenseCreateComponent -> CurrencyService: convertAmount(amount, currency, baseCurrency)
+    activate CurrencyService
+    CurrencyService -> LocalStorage: read currencies and exchange rates
+    LocalStorage --> CurrencyService: currencies + exchange rates
+    CurrencyService --> ExpenseCreateComponent: converted amount or null
+    deactivate CurrencyService
+    ExpenseCreateComponent --> User: show success message with Draft status
+  else service returns Error
+    ExpenseCreateComponent -> Store: dispatch(createExpenseFailure(error))
+    ExpenseCreateComponent --> User: show inline error message
+  end
+end
+
+deactivate ExpenseCreateComponent
+
+@enduml

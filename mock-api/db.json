@@ -1,0 +1,136 @@
+{
+  "users": [
+    {
+      "userId": "u-admin-001",
+      "fullName": "Admin User",
+      "email": "admin@expensetracker.local",
+      "passwordHash": "Admin@123",
+      "role": "Admin",
+      "isEmailVerified": true,
+      "status": "Active",
+      "createdAt": "2026-06-01T00:00:00.000Z",
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "userId": "u-user-001",
+      "fullName": "Alex Johnson",
+      "email": "user1@expensetracker.local",
+      "passwordHash": "User@123",
+      "role": "User",
+      "isEmailVerified": true,
+      "status": "Active",
+      "createdAt": "2026-06-01T00:00:00.000Z",
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    }
+  ],
+  "categories": [
+    {
+      "categoryId": "cat-001",
+      "name": "Travel",
+      "description": "Transport and commute costs",
+      "isSystemDefault": true,
+      "isActive": true,
+      "createdByUserId": "u-admin-001",
+      "createdAt": "2026-06-01T00:00:00.000Z",
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "categoryId": "cat-002",
+      "name": "Meals",
+      "description": "Food and dining expenses",
+      "isSystemDefault": true,
+      "isActive": true,
+      "createdByUserId": "u-admin-001",
+      "createdAt": "2026-06-01T00:00:00.000Z",
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "categoryId": "cat-003",
+      "name": "Utilities",
+      "description": "Internet, phone, electricity and utility bills",
+      "isSystemDefault": true,
+      "isActive": true,
+      "createdByUserId": "u-admin-001",
+      "createdAt": "2026-06-01T00:00:00.000Z",
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    }
+  ],
+  "currencies": [
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "symbol": "$",
+      "isActive": true
+    },
+    {
+      "code": "EUR",
+      "name": "Euro",
+      "symbol": "EUR",
+      "isActive": true
+    },
+    {
+      "code": "INR",
+      "name": "Indian Rupee",
+      "symbol": "INR",
+      "isActive": true
+    },
+    {
+      "code": "GBP",
+      "name": "British Pound",
+      "symbol": "GBP",
+      "isActive": true
+    },
+    {
+      "code": "JPY",
+      "name": "Japanese Yen",
+      "symbol": "JPY",
+      "isActive": true
+    }
+  ],
+  "exchangeRates": [
+    {
+      "baseCurrency": "USD",
+      "quoteCurrency": "USD",
+      "rate": 1,
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "baseCurrency": "USD",
+      "quoteCurrency": "EUR",
+      "rate": 0.92,
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "baseCurrency": "USD",
+      "quoteCurrency": "INR",
+      "rate": 83.4,
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "baseCurrency": "USD",
+      "quoteCurrency": "GBP",
+      "rate": 0.78,
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "baseCurrency": "USD",
+      "quoteCurrency": "JPY",
+      "rate": 157.3,
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    }
+  ],
+  "settings": [
+    {
+      "settingId": "s-currency-001",
+      "key": "baseCurrency",
+      "value": "USD",
+      "scope": "user",
+      "scopeRefId": "u-user-001",
+      "updatedByUserId": "u-user-001",
+      "updatedAt": "2026-06-01T00:00:00.000Z"
+    }
+  ],
+  "expenses": [],
+  "sessions": [],
+  "auditLogs": []
+}

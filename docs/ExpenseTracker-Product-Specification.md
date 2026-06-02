@@ -3,8 +3,8 @@
 ## 1. Document Control
 - Product Name: ExpenseTracker (Web Application)
 - Document Type: Product Specification (Functional)
-- Version: 1.0
-- Date: May 29, 2026
+- Version: 1.1
+- Date: June 2, 2026
 - Status: Draft for implementation planning
 
 ## 2. Product Vision
@@ -54,10 +54,13 @@ Acceptance indicators:
 - FR-02.4 Expense status lifecycle: Draft -> Submitted -> Approved/Rejected -> Reimbursed (optional stage).
 - FR-02.5 Bulk update support for selected expenses.
 - FR-02.6 Recurring expense setup (daily/weekly/monthly cadence as configured).
+- FR-02.7 Multi-currency entry support with conversion preview to user-selected base/reporting currency.
 
 Acceptance indicators:
 - Users can complete create/edit/delete actions without role violations.
 - Status transitions follow configured workflow rules.
+- Currency selected during expense entry is validated against supported currencies.
+- Conversion preview is shown for supported currency pairs when amount and base/reporting currency are available.
 
 ### FR-03 Categories and Tagging
 - FR-03.1 Default categories available at onboarding.
@@ -107,9 +110,11 @@ Acceptance indicators:
 - FR-08.1 User profile update (name, contact details).
 - FR-08.2 Currency, locale, and timezone preferences.
 - FR-08.3 Personal default preferences for expense entry.
+- FR-08.4 User-level base/reporting currency preference for conversion and display context.
 
 Acceptance indicators:
 - User preferences persist across sessions.
+- Base/reporting currency preference is retained and reused in expense entry workflows.
 
 ### FR-09 Standard Logging and Auditability
 - FR-09.1 Authentication logs: login success/failure, logout, reset-password events.
@@ -186,3 +191,4 @@ Acceptance indicators:
 ## 11. Change Log
 - v1.0: Initial specification drafted for ExpenseTracker web application.
 - Reports and Export explicitly moved to out-of-scope for current phase.
+- v1.1: Added multi-currency support requirements including conversion preview and base/reporting currency preference handling.
